@@ -10,7 +10,7 @@ object SketchUtil {
         val width: Int = bitmap.width;
         val height: Int = bitmap.height
         val path = Path()
-        var newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
         path.addCircle((width/2).toFloat(), (height/2).toFloat(),
                 Math.min(width, height/2).toFloat(), Path.Direction.CCW)

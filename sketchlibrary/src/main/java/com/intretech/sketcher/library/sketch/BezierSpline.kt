@@ -89,7 +89,7 @@ object BezierSpline {
 
     private fun calculateControlPoints(points: Array<Point>): Array<Point> {
         val n = points.size - 1
-        val controlPoints = emptyArray<Point>()
+        val controlPoints = Array(n, {Point(0,0)})
 
         if (n == 1) {
             controlPoints[0] = Point((2 * points[0].x + points[1].x) / 3,

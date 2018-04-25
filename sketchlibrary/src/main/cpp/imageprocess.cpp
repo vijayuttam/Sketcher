@@ -1,11 +1,29 @@
-//
-// Created by deejan on 4/24/18.
-//
 
 #include <jni.h>
-#include <string>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-static void hsl_rgb(unsigned int &c, const float &temp1, const float &temp2, const float &temp3) {
+
+static inline jint *getPointerArray(JNIEnv *env, jintArray buff) {
+    jint *ptrBuff = NULL;
+    if (buff != NULL)
+        ptrBuff = env->GetIntArrayElements(buff, reinterpret_cast<jboolean *> (false));
+    return ptrBuff;
+}
+
+static inline jintArray convertIntoArray(JNIEnv *env, jint size, jint *arr) {
+    jintArray result = env->NewIntArray(size);
+    env->SetIntArrayRegion(result, 0, size, arr);
+    return result;
+}
+
+static inline void releaseArray(JNIEnv *env, jintArray array1, jint *array2) {
+    if (array1 != NULL)
+        env->ReleaseIntArrayElements(array1, array2, 0);
+}
+
+static void HSL_RGB(unsigned int &c, const float &temp1, const float &temp2, const float &temp3) {
     if ((temp3 * 6) < 1)
         c = (unsigned int) ((temp2 + (temp1 - temp2) * 6 * temp3) * 100);
     else if ((temp3 * 2) < 1)
@@ -17,7 +35,8 @@ static void hsl_rgb(unsigned int &c, const float &temp1, const float &temp2, con
     return;
 }
 
-void saturation(int *pixels, float level, int width, int height) {
+
+static void saturation(int *pixels, float level, int width, int height) {
     unsigned int r;
     unsigned int g;
     unsigned int b;
@@ -66,10 +85,12 @@ void saturation(int *pixels, float level, int width, int height) {
         if (max_color == min_color) {
             S = 0;
             H = 0;
-        } else {
+        }
+        else {
             if (L < .50) {
                 S = (max_color - min_color) / (max_color + min_color);
-            } else {
+            }
+            else {
                 S = (max_color - min_color) / (2 - max_color - min_color);
             }
             if (max_color == r_percent) {
@@ -91,42 +112,46 @@ void saturation(int *pixels, float level, int width, int height) {
         S *= level;
         if (S > 100) {
             S = 100;
-        } else if (S < 0) {
+        }
+        else if (S < 0) {
             S = 0;
         }
 
-        L = L / 100;
-        S = S / 100;
-        H = H / 360;
+        L = ((float) L) / 100;
+        S = ((float) S) / 100;
+        H = ((float) H) / 360;
 
         if (S == 0) {
-            r = static_cast<unsigned int>(L * 100);
-            g = static_cast<unsigned int>(L * 100);
-            b = static_cast<unsigned int>(L * 100);
-        } else {
+            r = L * 100;
+            g = L * 100;
+            b = L * 100;
+        }
+        else {
             temp1 = 0;
             if (L < .50) {
                 temp1 = L * (1 + S);
-            } else {
+            }
+            else {
                 temp1 = L + S - (L * S);
             }
 
             temp2 = 2 * L - temp1;
 
-            for (int j = 0; j < 3; j++) {
-                switch (j) {
+
+            for (int i = 0; i < 3; i++) {
+                switch (i) {
                     case 0: // red
                     {
                         temp3 = H + .33333f;
                         if (temp3 > 1)
                             temp3 -= 1;
-                        hsl_rgb(r, temp1, temp2, temp3);
+                        HSL_RGB(r, temp1, temp2, temp3);
                         break;
                     }
                     case 1: // green
                     {
                         temp3 = H;
-                        hsl_rgb(g, temp1, temp2, temp3);
+                        HSL_RGB(g, temp1, temp2, temp3);
                         break;
                     }
                     case 2: // blue
@@ -134,7 +159,7 @@ void saturation(int *pixels, float level, int width, int height) {
                         temp3 = H - .33333f;
                         if (temp3 < 0)
                             temp3 += 1;
-                        hsl_rgb(b, temp1, temp2, temp3);
+                        HSL_RGB(b, temp1, temp2, temp3);
                         break;
                     }
                     default: {
@@ -146,15 +171,13 @@ void saturation(int *pixels, float level, int width, int height) {
         g = (unsigned int) ((((float) g) / 100) * 255);
         b = (unsigned int) ((((float) b) / 100) * 255);
 
-        pixels[i] = pixels[i] & 0xFF000000 | ((int) r << 16) & 0x00FF0000 |
-                    ((int) g << 8) & 0x0000FF00 |
+        pixels[i] = pixels[i] & 0xFF000000 | ((int) r << 16) & 0x00FF0000 | ((int) g << 8) & 0x0000FF00 |
                     (int) b & 0x000000FF;;
 
     }
 }
 
-static void
-colorOverlay(int *pixels, int depth, float red, float green, float blue, int width, int height) {
+static void colorOverlay(int *pixels, int depth, float red, float green, float blue, int width, int height) {
 
     float R, G, B;
 
@@ -172,8 +195,7 @@ colorOverlay(int *pixels, int depth, float red, float green, float blue, int wid
         B += (depth * blue);
         if (B > 255) { B = 255; }
 
-        pixels[i] = pixels[i] & 0xFF000000 | ((int) R << 16) & 0x00FF0000 |
-                    ((int) G << 8) & 0x0000FF00 |
+        pixels[i] = pixels[i] & 0xFF000000 | ((int) R << 16) & 0x00FF0000 | ((int) G << 8) & 0x0000FF00 |
                     (int) B & 0x000000FF;
     }
 }
@@ -188,9 +210,9 @@ static void contrast(int width, int height, int *pixels, float value) {
         green = (pixels[i] >> 8) & 0xFF;
         blue = (pixels[i]) & 0xFF;
 
-        red = static_cast<float>(((((red / 255.0) - 0.5) * value) + 0.5) * 255.0);
-        green = static_cast<float>(((((green / 255.0) - 0.5) * value) + 0.5) * 255.0);
-        blue = static_cast<float>(((((blue / 255.0) - 0.5) * value) + 0.5) * 255.0);
+        red = (((((red / 255.0) - 0.5) * value) + 0.5) * 255.0);
+        green = (((((green / 255.0) - 0.5) * value) + 0.5) * 255.0);
+        blue = (((((blue / 255.0) - 0.5) * value) + 0.5) * 255.0);
 
         // validation check
         if (red > 255)
@@ -211,8 +233,7 @@ static void contrast(int width, int height, int *pixels, float value) {
         R = (int) red;
         G = (int) green;
         B = (int) blue;
-        pixels[i] = pixels[i] & 0xFF000000 | (R << 16) & 0x00FF0000 | (G << 8) & 0x0000FF00 |
-                    B & 0x000000FF;
+        pixels[i] = pixels[i] & 0xFF000000 | (R << 16) & 0x00FF0000 | (G << 8) & 0x0000FF00 | B & 0x000000FF;
     }
 }
 
@@ -245,8 +266,7 @@ static void brightness(int width, int height, int *pixels, int value) {
         else if (blue < 0)
             blue = 0;
 
-        pixels[i] = pixels[i] & 0xFF000000 | (red << 16) & 0x00FF0000 | (green << 8) & 0x0000FF00 |
-                    blue & 0x000000FF;
+        pixels[i] = pixels[i] & 0xFF000000 | (red << 16) & 0x00FF0000 | (green << 8) & 0x0000FF00 | blue & 0x000000FF;
     }
 }
 
@@ -291,8 +311,7 @@ static void applyRGBCurve(int width, int height, int *pixels, int *rgb) {
 
     for (int i = 0; i < width * height; i++) {
         pixels[i] =
-                0xFF000000 & pixels[i] | R[(pixels[i] >> 16) & 0xFF] | G[(pixels[i] >> 8) & 0xFF] |
-                B[pixels[i] & 0xFF];
+                0xFF000000 & pixels[i] | R[(pixels[i] >> 16) & 0xFF] | G[(pixels[i] >> 8) & 0xFF] | B[pixels[i] & 0xFF];
     }
 
 }

@@ -1,15 +1,18 @@
 package com.intretech.sketcher.library
 
+import android.content.Context
 import android.graphics.Point
 import com.intretech.sketcher.library.filter.BrightnessFilter
 import com.intretech.sketcher.library.filter.ContrastFilter
-import com.intretech.sketcher.library.filter.CurveFilter
+import com.intretech.sketcher.library.filter.NormalFilter
 import com.intretech.sketcher.library.filter.Filter
+import com.intretech.sketcher.library.filter.SaturationFilter
+import com.intretech.sketcher.library.filter.VignetteFilter
 
-class SketchFilters {
+object SketchFilters {
 
     fun lightFilter(): Filter {
-        val rgbPoints: Array<Point> = emptyArray()
+        val rgbPoints: Array<Point> = Array(8, {Point(0, 0)})
         rgbPoints[0] = Point(0, 0)
         rgbPoints[1] = Point(34, 6)
         rgbPoints[2] = Point(69, 23)
@@ -19,12 +22,13 @@ class SketchFilters {
         rgbPoints[6] = Point(207, 233)
         rgbPoints[7] = Point(255, 255)
         val filter = Filter()
-        filter.addFilter(CurveFilter(rgbPoints, null, null, null))
+        filter.addFilter(NormalFilter(rgbPoints, null, null, null))
+        filter.addFilter(ContrastFilter(5f))
         return filter
     }
 
     fun blueFilter(): Filter {
-        val redPoints: Array<Point> = emptyArray()
+        val redPoints: Array<Point> = Array(8, {Point(0, 0)})
         redPoints[0] = Point(0, 0)
         redPoints[1] = Point(86, 34)
         redPoints[2] = Point(117, 41)
@@ -34,17 +38,16 @@ class SketchFilters {
         redPoints[6] = Point(225, 242)
         redPoints[7] = Point(255, 255)
         val filter = Filter()
-        filter.addFilter(CurveFilter(null, redPoints, null, null))
-        filter.addFilter(BrightnessFilter(30))
-        filter.addFilter(ContrastFilter(1f))
+        filter.addFilter(NormalFilter(null, redPoints, null, null))
+        filter.addFilter(BrightnessFilter(60))
         return filter
     }
 
     fun viberFilter(): Filter {
-        val rgbPoints: Array<Point> = emptyArray()
-        val redPoints: Array<Point> = emptyArray()
-        val greenPoints: Array<Point> = emptyArray()
-        val bluePoints: Array<Point> = emptyArray()
+        val rgbPoints: Array<Point> = Array(5, {Point(0, 0)})
+        val redPoints: Array<Point> = Array(5, {Point(0, 0)})
+        val greenPoints: Array<Point> = Array(6, {Point(0, 0)})
+        val bluePoints: Array<Point> = Array(7, {Point(0, 0)})
 
         rgbPoints[0] = Point(0, 0)
         rgbPoints[1] = Point(80, 43)
@@ -76,25 +79,26 @@ class SketchFilters {
         bluePoints[6] = Point(255, 255)
 
         val filter = Filter()
-        filter.addFilter(CurveFilter(rgbPoints, redPoints, greenPoints, bluePoints))
+        filter.addFilter(NormalFilter(rgbPoints, redPoints, greenPoints, bluePoints))
         return filter
     }
 
     fun stutterFilter(): Filter {
-        val bluePoints: Array<Point> = emptyArray()
+        val bluePoints: Array<Point> = Array(3, {Point(0, 0)})
         bluePoints[0] = Point(0, 0)
         bluePoints[1] = Point(165, 114)
         bluePoints[2] = Point(255, 255)
         val filter = Filter()
-        filter.addFilter(CurveFilter(null, null, null, bluePoints))
+        filter.addFilter(NormalFilter(null, null, null, bluePoints))
+        filter.addFilter(SaturationFilter(10f))
         return filter
     }
 
-    fun whisperFilter(): Filter {
-        val rgbPoints: Array<Point> = emptyArray()
-        val redPoints: Array<Point> = emptyArray()
-        val greenPoints: Array<Point> = emptyArray()
-        val bluePoints: Array<Point> = emptyArray()
+    fun whisperFilter(context: Context): Filter {
+        val rgbPoints: Array<Point> = Array(3, {Point(0, 0)})
+        val redPoints: Array<Point> = Array(4, {Point(0, 0)})
+        val greenPoints: Array<Point> = Array(3, {Point(0, 0)})
+        val bluePoints: Array<Point> = Array(3, {Point(0, 0)})
 
         rgbPoints[0] = Point(0, 0)
         rgbPoints[1] = Point(174, 109)
@@ -114,7 +118,8 @@ class SketchFilters {
         bluePoints[2] = Point(255, 255)
 
         val filter = Filter()
-        filter.addFilter(CurveFilter(rgbPoints, redPoints, greenPoints, bluePoints))
+        filter.addFilter(NormalFilter(rgbPoints, redPoints, greenPoints, bluePoints))
+        filter.addFilter(VignetteFilter(context, 10))
         return filter
     }
 }

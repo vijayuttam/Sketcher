@@ -18,7 +18,7 @@ add_library( # Sets the name of the library.
 
              # Provides a relative path to your source file(s).
              src/main/cpp/native-lib.cpp
-             src/main/cpp/localfilter.cpp)
+             src/main/cpp/imageprocess.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -42,10 +42,7 @@ target_link_libraries( # Specifies the target library.
 
                        # Links the target library to the log library
                        # included in the NDK.
-                       ${log-lib}
-                        GLESv2
-                        jnigraphics)
-
+                       ${log-lib})
 
 
 include(CheckCXXCompilerFlag)
@@ -58,5 +55,3 @@ elseif(COMPILER_SUPPORTS_CXX0X)
 else()
      message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti")

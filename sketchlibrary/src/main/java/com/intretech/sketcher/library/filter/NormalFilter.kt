@@ -5,20 +5,21 @@ import android.graphics.Point
 import com.intretech.sketcher.library.sketch.BezierSpline
 import com.intretech.sketcher.library.sketch.ImageSketcher
 
-class CurveFilter : IFilter {
+class NormalFilter(rgbPoint: Array<Point>?, red: Array<Point>?, green: Array<Point>?,
+        blue: Array<Point>?) : IFilter {
 
     private var tag = ""
     private var rgbPoint: Array<Point>? = null
-    private var green: Array<Point>? = null
     private var red: Array<Point>? = null
     private var blue: Array<Point>? = null
+    private var green: Array<Point>? = null
     private var rgb: IntArray? = null
     private var r: IntArray? = null
     private var g: IntArray? = null
     private var b: IntArray? = null
 
-    constructor(rgbPoint: Array<Point>?, red: Array<Point>? , green: Array<Point>?, blue: Array<Point>?) {
-        val straightPoint = emptyArray<Point>()
+    init {
+        val straightPoint: Array<Point> = Array(2, {Point(0, 0)})
         straightPoint[0] = Point(0, 0)
         straightPoint[1] = Point(255, 255)
         if (this.rgbPoint == null) {
@@ -65,9 +66,9 @@ class CurveFilter : IFilter {
         red = sortPointsOnXAxis(red)
         green = sortPointsOnXAxis(green)
         blue = sortPointsOnXAxis(blue)
+
         if (rgb == null) {
-            rgb = BezierSpline.curveGenerator(
-                    rgbPoint)
+            rgb = BezierSpline.curveGenerator(rgbPoint)
         }
 
         if (r == null) {
@@ -82,8 +83,7 @@ class CurveFilter : IFilter {
             b = BezierSpline.curveGenerator(blue)
         }
 
-        return ImageSketcher.applyCurves(rgb, r, g,
-                b, bitmap)
+        return ImageSketcher.applyCurves(rgb, r, g, b, bitmap)
     }
 
     override fun getTag(): Any {
