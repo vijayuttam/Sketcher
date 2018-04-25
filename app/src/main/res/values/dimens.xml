@@ -1,0 +1,8 @@
+<resources>
+
+  <dimen name="bitmapSize">80dp</dimen>
+  <dimen name="recyclerSize">100dp</dimen>
+
+  <dimen name="horizontalPadding">8dp</dimen>
+  <dimen name="verticalPadding">8dp</dimen>
+</resources>

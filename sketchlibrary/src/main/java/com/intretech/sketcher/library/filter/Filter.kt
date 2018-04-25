@@ -4,18 +4,18 @@ import android.graphics.Bitmap
 
 class Filter() {
 
-    var subFilters: MutableList<IFilter> = ArrayList()
+    var filters: MutableList<IFilter> = ArrayList()
 
     fun addFilter(subFilter: IFilter) {
-        subFilters.add(subFilter)
+        filters.add(subFilter)
     }
 
     fun clearFilters() {
-        subFilters.clear()
+        filters.clear()
     }
 
     fun removeFilterWithTag(tag: String) {
-        val iterator = subFilters.iterator()
+        val iterator = filters.iterator()
         while (iterator.hasNext()) {
             val subFilter = iterator.next()
             if (subFilter.getTag().equals(tag)) {
@@ -25,7 +25,7 @@ class Filter() {
     }
 
     fun getFilterByTag(tag: String): IFilter? {
-        for (subFilter in subFilters) {
+        for (subFilter in filters) {
             if (subFilter.getTag().equals(tag)) {
                 return subFilter
             }
@@ -34,22 +34,21 @@ class Filter() {
     }
 
 
-    fun processFilter(inputImage: Bitmap): Bitmap? {
-        var outputImage: Bitmap? = inputImage
-        if (outputImage != null) {
-            for (subFilter in subFilters) {
+    fun processFilter(inputBitmap: Bitmap): Bitmap? {
+        var outputBitmap: Bitmap? = inputBitmap
+        if (outputBitmap != null) {
+            for (filter in filters) {
                 try {
-                    outputImage = subFilter.process(outputImage!!)
+                    outputBitmap = filter.process(outputBitmap!!)
                 } catch (oe: OutOfMemoryError) {
                     System.gc()
                     try {
-                        outputImage = subFilter.process(outputImage!!)
+                        outputBitmap = filter.process(outputBitmap!!)
                     } catch (ignored: OutOfMemoryError) {
                     }
                 }
-
             }
         }
-        return outputImage
+        return outputBitmap
     }
 }
